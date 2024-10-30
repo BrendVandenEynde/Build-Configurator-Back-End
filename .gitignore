@@ -1,1 +1,27 @@
-node_modules
+# Node modules
+node_modules/
+
+# Environment variable files
+.env
+
+# Config folder for sensitive configuration
+config/*.json
+!config/default.json    # Keep default.json for reference if needed, exclude others
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Optional: Ignore build artifacts if any
+dist/
+build/
+
+# Optional: Ignore coverage reports
+coverage/
