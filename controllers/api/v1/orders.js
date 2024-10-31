@@ -1,15 +1,21 @@
 const Order = require('../../../models/api/v1/Order.js');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const { v4: uuidv4 } = require('uuid');
+
+// Helper function for standardized error responses
+const errorResponse = (res, message, statusCode = 400) => {
+    return res.status(statusCode).json({ status: 'error', message });
+};
 
 // Middleware to check admin authentication
 const checkAdmin = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).json({ status: 'error', message: 'No token provided' });
+    if (!token) return errorResponse(res, 'No token provided', 401);
 
     jwt.verify(token, config.get('jwtSecret'), (err, decoded) => {
-        if (err) return res.status(403).json({ status: 'error', message: 'Failed to authenticate token' });
-        if (decoded.role !== 'admin') return res.status(403).json({ status: 'error', message: 'Not authorized' });
+        if (err) return errorResponse(res, 'Failed to authenticate token', 403);
+        if (decoded.role !== 'admin') return errorResponse(res, 'Not authorized', 403);
         req.userId = decoded.id; // Save the user ID for further use
         next();
     });
@@ -20,21 +26,37 @@ exports.createOrder = async (req, res) => {
     const { customerName, customerEmail, shoeSize, laceColor } = req.body;
 
     try {
-        const newOrder = new Order({ customerName, customerEmail, shoeSize, laceColor });
+        const newOrder = new Order({
+            orderNumber: uuidv4(), // Use UUID for unique order number
+            customerName,
+            customerEmail,
+            shoeSize,
+            laceColor
+        });
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
     } catch (error) {
-        res.status(400).json({ status: 'error', message: error.message });
+        errorResponse(res, error.message, 400);
     }
 };
 
 // Get all orders
 exports.getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find();
+        const { sortby } = req.query;
+        let orders;
+
+        if (sortby === 'votes') {
+            orders = await Order.find().sort({ votes: -1 });
+        } else if (sortby === 'date') {
+            orders = await Order.find().sort({ createdAt: -1 });
+        } else {
+            orders = await Order.find();
+        }
+
         res.status(200).json({ status: 'success', data: { orders } });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
+        errorResponse(res, error.message);
     }
 };
 
@@ -44,11 +66,11 @@ exports.getOrderById = async (req, res) => {
     try {
         const order = await Order.findById(id);
         if (!order) {
-            return res.status(404).json({ status: 'error', message: 'Order not found' });
+            return errorResponse(res, 'Order not found', 404);
         }
         res.status(200).json({ status: 'success', data: { order } });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
+        errorResponse(res, error.message);
     }
 };
 
@@ -57,14 +79,19 @@ exports.updateOrder = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    // Validate status
+    if (!['in production', 'shipped', 'delivered', 'cancelled'].includes(status)) {
+        return errorResponse(res, 'Invalid status', 400);
+    }
+
     try {
         const updatedOrder = await Order.findByIdAndUpdate(id, { status }, { new: true });
         if (!updatedOrder) {
-            return res.status(404).json({ status: 'error', message: 'Order not found' });
+            return errorResponse(res, 'Order not found', 404);
         }
         res.status(200).json({ status: 'success', data: { order: updatedOrder } });
     } catch (error) {
-        res.status(400).json({ status: 'error', message: error.message });
+        errorResponse(res, error.message, 400);
     }
 };
 
@@ -75,11 +102,11 @@ exports.deleteOrder = async (req, res) => {
     try {
         const deletedOrder = await Order.findByIdAndDelete(id);
         if (!deletedOrder) {
-            return res.status(404).json({ status: 'error', message: 'Order not found' });
+            return errorResponse(res, 'Order not found', 404);
         }
         res.status(200).json({ status: 'success', message: 'Order deleted successfully' });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
+        errorResponse(res, error.message);
     }
 };
 
