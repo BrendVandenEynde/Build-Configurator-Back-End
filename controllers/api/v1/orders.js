@@ -22,7 +22,7 @@ const checkAdmin = (req, res, next) => {
 };
 
 // Create a new order
-exports.createOrder = async (req, res) => {
+const createOrder = async (req, res) => {
     const { customerName, customerEmail, shoeSize, laceColor } = req.body;
 
     try {
@@ -31,7 +31,7 @@ exports.createOrder = async (req, res) => {
             customerName,
             customerEmail,
             shoeSize,
-            laceColor
+            laceColor,
         });
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
@@ -41,7 +41,7 @@ exports.createOrder = async (req, res) => {
 };
 
 // Get all orders
-exports.getAllOrders = async (req, res) => {
+const getAllOrders = async (req, res) => {
     try {
         const { sortby } = req.query;
         let orders;
@@ -61,7 +61,7 @@ exports.getAllOrders = async (req, res) => {
 };
 
 // Get a specific order by ID
-exports.getOrderById = async (req, res) => {
+const getOrderById = async (req, res) => {
     const { id } = req.params;
     try {
         const order = await Order.findById(id);
@@ -75,7 +75,7 @@ exports.getOrderById = async (req, res) => {
 };
 
 // Update an order by ID
-exports.updateOrder = async (req, res) => {
+const updateOrder = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
@@ -85,7 +85,11 @@ exports.updateOrder = async (req, res) => {
     }
 
     try {
-        const updatedOrder = await Order.findByIdAndUpdate(id, { status }, { new: true });
+        const updatedOrder = await Order.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
         if (!updatedOrder) {
             return errorResponse(res, 'Order not found', 404);
         }
@@ -96,7 +100,7 @@ exports.updateOrder = async (req, res) => {
 };
 
 // Delete an order by ID (Admin only)
-exports.deleteOrder = async (req, res) => {
+const deleteOrder = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -117,5 +121,5 @@ module.exports = {
     getOrderById,
     updateOrder,
     deleteOrder,
-    checkAdmin // Exporting the middleware
+    checkAdmin, // Exporting the middleware
 };

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // Define the Order schema
 const OrderSchema = new mongoose.Schema({
-  orderNumber: { type: Number, unique: true, required: true }, 
+  orderNumber: { type: String, unique: true, required: true }, // Changed to String for UUID
   customerName: { type: String, required: true },
   customerEmail: { type: String, required: true },
   shoeSize: { type: Number, required: true },
@@ -10,9 +10,9 @@ const OrderSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['in production', 'shipped', 'delivered', 'cancelled'],
-    default: 'in production'
+    default: 'in production',
   },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Create the Order model
