@@ -23,7 +23,29 @@ const checkAdmin = (req, res, next) => {
 
 // Create a new order
 const createOrder = async (req, res) => {
-    const { customerName, customerEmail, shoeSize, laceColor } = req.body;
+    const {
+        customerName,
+        customerEmail,
+        shoeSize,
+        layers
+    } = req.body;
+
+    // Validate layers
+    const layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
+    const validLayerMaterials = ['none selected', 'leather', 'cotton', 'synthetic', 'rubber'];
+
+    for (const key of layerKeys) {
+        const layer = layers[key];
+        if (layer) {
+            const { material, color } = layer;
+            if (!validLayerMaterials.includes(material)) {
+                return errorResponse(res, `Invalid material for ${key}`, 400);
+            }
+            if (typeof color !== 'string' || color.trim() === '') {
+                return errorResponse(res, `Invalid color for ${key}`, 400);
+            }
+        }
+    }
 
     try {
         const newOrder = new Order({
@@ -31,7 +53,7 @@ const createOrder = async (req, res) => {
             customerName,
             customerEmail,
             shoeSize,
-            laceColor,
+            layers // Include layers when creating the order
         });
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
