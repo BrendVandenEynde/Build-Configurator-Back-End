@@ -17,22 +17,23 @@ var app = express();
 
 // Enable CORS for specific origins
 const allowedOrigins = [
-  'http://localhost:3000', // Allow local frontend
-  'file://',                // Allow Electron renderer
-  // Add any other domains you want to allow
+  'http://localhost:3000', // Local development
+  'https://build-sneaker-model-config.onrender.com', // Your frontend on Render
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, origin);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not ' +
+                  'allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
+    return callback(null, true);
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
-  credentials: true // If you need to allow cookies, set this to true
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
+  credentials: true // Enable set cookies
 }));
 
 // Set up logging, parsing, and static files handling
