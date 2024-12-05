@@ -15,8 +15,25 @@ var ordersRouter = require('./routes/api/v1/orders.js');
 // Create an Express app
 var app = express();
 
-// Enable CORS for all routes
-app.use(cors());
+// Enable CORS for specific origins
+const allowedOrigins = [
+  'http://localhost:3000', // Allow local frontend
+  'file://',                // Allow Electron renderer
+  // Add any other domains you want to allow
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, origin);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+  credentials: true // If you need to allow cookies, set this to true
+}));
 
 // Set up logging, parsing, and static files handling
 app.use(logger('dev'));
