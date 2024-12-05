@@ -2,7 +2,22 @@ const mongoose = require('mongoose');
 
 // Define the Layer schema
 const LayerSchema = new mongoose.Schema({
-    material: { type: String, required: true, enum: ['none selected', 'leather', 'cotton', 'synthetic', 'rubber'] },
+    material: { 
+        type: String, 
+        required: true, 
+        enum: [
+            'none selected', 
+            'army', 
+            'crocodile', 
+            'glitter', 
+            'leather', 
+            'leopard', 
+            'blocked', 
+            'zebra', 
+            'flower', 
+            'pizza'
+        ] 
+    },
     color: { type: String, required: true }
 });
 

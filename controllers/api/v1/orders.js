@@ -32,14 +32,25 @@ const createOrder = async (req, res) => {
 
     // Validate layers
     const layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
-    const validLayerMaterials = ['none selected', 'leather', 'cotton', 'synthetic', 'rubber'];
+    const validLayerMaterials = [
+        'none selected',
+        'army',
+        'crocodile',
+        'glitter',
+        'leather',
+        'leopard',
+        'blocked',
+        'zebra',
+        'flower',
+        'pizza'
+    ];
 
     for (const key of layerKeys) {
         const layer = layers[key];
         if (layer) {
             const { material, color } = layer;
             if (!validLayerMaterials.includes(material)) {
-                return errorResponse(res, `Invalid material for ${key}`, 400);
+                return errorResponse(res, `Invalid material for ${key}: ${material}`, 400);
             }
             if (typeof color !== 'string' || color.trim() === '') {
                 return errorResponse(res, `Invalid color for ${key}`, 400);
