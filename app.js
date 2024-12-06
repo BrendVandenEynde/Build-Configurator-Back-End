@@ -23,8 +23,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
+    console.log('Origin:', origin); // Log the incoming origin for debugging
+    if (!origin) return callback(null, true); // Allow requests with no origin (like mobile apps)
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not ' +
         'allow access from the specified Origin.';
@@ -82,6 +82,11 @@ app.use(function (err, req, res, next) {
 
   // Send error as a JSON response
   res.status(err.status || 500).json(errorResponse);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // Export the app module
