@@ -15,25 +15,11 @@ var ordersRouter = require('./routes/api/v1/orders.js');
 // Create an Express app
 var app = express();
 
-// Enable CORS for specific origins
-const allowedOrigins = [
-  'http://localhost:3000', // Local development
-  'https://build-sneaker-model-config.onrender.com', // Your frontend on Render
-];
-
+// Enable CORS for all origins
 app.use(cors({
-  origin: function (origin, callback) {
-    console.log('Origin:', origin); // Log the incoming origin for debugging
-    if (!origin) return callback(null, true); // Allow requests with no origin (like mobile apps)
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not ' +
-        'allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
-  credentials: true // Enable set cookies
+  credentials: true // Enable set cookies (if you need cookies, keep this true)
 }));
 
 // Set up logging, parsing, and static files handling
