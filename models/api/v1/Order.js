@@ -16,9 +16,10 @@ const SneakerLayerSchema = new mongoose.Schema({
             'zebra',
             'flower',
             'pizza'
-        ]
+        ],
+        default: 'none selected'
     },
-    color: { type: String, required: true }
+    color: { type: String, required: true, default: '#000000' }
 });
 
 // Define the Layer schema for heels
@@ -37,37 +38,43 @@ const HeelLayerSchema = new mongoose.Schema({
             'zebra',
             'flower',
             'pizza'
-        ]
+        ],
+        default: 'none selected'
     },
-    color: { type: String, required: true }
+    color: { type: String, required: true, default: '#000000' }
 });
 
 // Define the Order schema
 const OrderSchema = new mongoose.Schema({
-    orderNumber: { type: String, unique: true, required: true }, // Changed to String for UUID
+    orderNumber: { type: String, unique: true, required: true },
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
     shoeSize: { type: Number, required: true },
     sneakerLayers: {
-        inside: { type: SneakerLayerSchema, required: true },
-        laces: { type: SneakerLayerSchema, required: true },
-        outside1: { type: SneakerLayerSchema, required: true },
-        outside2: { type: SneakerLayerSchema, required: true },
-        sole1: { type: SneakerLayerSchema, required: true },
-        sole2: { type: SneakerLayerSchema, required: true }
+        inside: { type: SneakerLayerSchema, required: false },
+        laces: { type: SneakerLayerSchema, required: false },
+        outside1: { type: SneakerLayerSchema, required: false },
+        outside2: { type: SneakerLayerSchema, required: false },
+        sole1: { type: SneakerLayerSchema, required: false },
+        sole2: { type: SneakerLayerSchema, required: false }
     },
     heelLayers: {
-        Object_2: { type: HeelLayerSchema, required: true },
-        Object_3: { type: HeelLayerSchema, required: true },
-        Object_4: { type: HeelLayerSchema, required: true },
-        Object_5: { type: HeelLayerSchema, required: true }
+        Object_2: { type: HeelLayerSchema, required: false },
+        Object_3: { type: HeelLayerSchema, required: false },
+        Object_4: { type: HeelLayerSchema, required: false },
+        Object_5: { type: HeelLayerSchema, required: false }
+    },
+    modelType: {
+        type: String,
+        required: true,
+        enum: ['sneaker', 'heel']
     },
     status: {
         type: String,
         enum: ['in production', 'shipped', 'delivered', 'cancelled'],
-        default: 'in production',
+        default: 'in production'
     },
-    createdAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now }
 });
 
 // Create the Order model
