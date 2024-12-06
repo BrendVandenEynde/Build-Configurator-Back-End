@@ -27,24 +27,50 @@ const createOrder = async (req, res) => {
         customerName,
         customerEmail,
         shoeSize,
-        layers
+        layers,
+        orderType // New field to distinguish between sneaker and heel orders
     } = req.body;
 
-    // Validate layers
-    const layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
-    const validLayerMaterials = [
-        'none selected',
-        'army',
-        'crocodile',
-        'glitter',
-        'leather',
-        'leopard',
-        'blocked',
-        'zebra',
-        'flower',
-        'pizza'
-    ];
+    // Validate orderType
+    if (!['sneaker', 'heel'].includes(orderType)) {
+        return errorResponse(res, 'Invalid order type', 400);
+    }
 
+    // Define layer keys and valid materials based on order type
+    let layerKeys;
+    let validLayerMaterials;
+
+    if (orderType === 'sneaker') {
+        layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
+        validLayerMaterials = [
+            'none selected',
+            'army',
+            'crocodile',
+            'glitter',
+            'leather',
+            'leopard',
+            'blocked',
+            'zebra',
+            'flower',
+            'pizza'
+        ];
+    } else if (orderType === 'heel') {
+        layerKeys = ['Object_2', 'Object_3', 'Object_4', 'Object_5'];
+        validLayerMaterials = [
+            'none selected',
+            'army',
+            'crocodile',
+            'glitter',
+            'leather',
+            'leopard',
+            'blocked',
+            'zebra',
+            'flower',
+            'pizza'
+        ];
+    }
+
+    // Validate layers
     for (const key of layerKeys) {
         const layer = layers[key];
         if (layer) {
@@ -55,6 +81,8 @@ const createOrder = async (req, res) => {
             if (typeof color !== 'string' || color.trim() === '') {
                 return errorResponse(res, `Invalid color for ${key}`, 400);
             }
+        } else {
+            return errorResponse(res, `Layer ${key} is missing`, 400);
         }
     }
 
@@ -64,7 +92,8 @@ const createOrder = async (req, res) => {
             customerName,
             customerEmail,
             shoeSize,
-            layers // Include layers when creating the order
+            layers, // Include layers when creating the order
+            orderType // Store the order type in the database
         });
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
@@ -76,15 +105,17 @@ const createOrder = async (req, res) => {
 // Get all orders
 const getAllOrders = async (req, res) => {
     try {
-        const { sortby } = req.query;
+        const { sortby, orderType } = req.query; // Include orderType in query
         let orders;
 
+        const filter = orderType ? { orderType } : {}; // Only filter if orderType is provided
+
         if (sortby === 'votes') {
-            orders = await Order.find().sort({ votes: -1 });
+            orders = await Order.find(filter).sort({ votes: -1 });
         } else if (sortby === 'date') {
-            orders = await Order.find().sort({ createdAt: -1 });
+            orders = await Order.find(filter).sort({ createdAt: -1 });
         } else {
-            orders = await Order.find();
+            orders = await Order.find(filter);
         }
 
         res.status(200).json({ status: 'success', data: { orders } });
