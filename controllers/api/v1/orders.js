@@ -28,19 +28,19 @@ const createOrder = async (req, res) => {
         customerEmail,
         shoeSize,
         layers,
-        orderType // New field to distinguish between sneaker and heel orders
+        modelType // Changed from orderType to modelType
     } = req.body;
 
-    // Validate orderType
-    if (!['sneaker', 'heel'].includes(orderType)) {
-        return errorResponse(res, 'Invalid order type', 400);
+    // Validate modelType
+    if (!['sneaker', 'heel'].includes(modelType)) {
+        return errorResponse(res, 'Invalid model type', 400);
     }
 
-    // Define layer keys and valid materials based on order type
+    // Define layer keys and valid materials based on model type
     let layerKeys;
     let validLayerMaterials;
 
-    if (orderType === 'sneaker') {
+    if (modelType === 'sneaker') {
         layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
         validLayerMaterials = [
             'none selected',
@@ -54,7 +54,7 @@ const createOrder = async (req, res) => {
             'flower',
             'pizza'
         ];
-    } else if (orderType === 'heel') {
+    } else if (modelType === 'heel') {
         layerKeys = ['Object_2', 'Object_3', 'Object_4', 'Object_5'];
         validLayerMaterials = [
             'none selected',
@@ -93,7 +93,7 @@ const createOrder = async (req, res) => {
             customerEmail,
             shoeSize,
             layers, // Include layers when creating the order
-            orderType // Store the order type in the database
+            modelType // Store modelType in the database
         });
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
@@ -105,10 +105,10 @@ const createOrder = async (req, res) => {
 // Get all orders
 const getAllOrders = async (req, res) => {
     try {
-        const { sortby, orderType } = req.query; // Include orderType in query
+        const { sortby, modelType } = req.query;
         let orders;
 
-        const filter = orderType ? { orderType } : {}; // Only filter if orderType is provided
+        const filter = modelType ? { modelType } : {};
 
         if (sortby === 'votes') {
             orders = await Order.find(filter).sort({ votes: -1 });
