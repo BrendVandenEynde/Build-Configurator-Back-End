@@ -50,6 +50,7 @@ const OrderSchema = new mongoose.Schema({
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
     shoeSize: { type: Number, required: true },
+    address: { type: String, required: true },
     sneakerLayers: {
         inside: { type: SneakerLayerSchema, required: false },
         laces: { type: SneakerLayerSchema, required: false },
