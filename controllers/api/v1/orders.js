@@ -28,7 +28,7 @@ const createOrder = async (req, res) => {
         customerEmail,
         shoeSize,
         layers,
-        modelType // Changed from orderType to modelType
+        modelType
     } = req.body;
 
     // Validate modelType
@@ -38,51 +38,44 @@ const createOrder = async (req, res) => {
 
     // Define layer keys and valid materials based on model type
     let layerKeys;
-    let validLayerMaterials;
+    const validLayerMaterials = [
+        'none selected',
+        'army',
+        'crocodile',
+        'glitter',
+        'leather',
+        'leopard',
+        'blocked',
+        'zebra',
+        'flower',
+        'pizza'
+    ];
 
     if (modelType === 'sneaker') {
         layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
-        validLayerMaterials = [
-            'none selected',
-            'army',
-            'crocodile',
-            'glitter',
-            'leather',
-            'leopard',
-            'blocked',
-            'zebra',
-            'flower',
-            'pizza'
-        ];
     } else if (modelType === 'heel') {
         layerKeys = ['Object_2', 'Object_3', 'Object_4', 'Object_5'];
-        validLayerMaterials = [
-            'none selected',
-            'army',
-            'crocodile',
-            'glitter',
-            'leather',
-            'leopard',
-            'blocked',
-            'zebra',
-            'flower',
-            'pizza'
-        ];
     }
 
     // Validate layers
     for (const key of layerKeys) {
         const layer = layers[key];
+
+        // If layer is provided, validate its contents
         if (layer) {
             const { material, color } = layer;
+
+            // Validate material
             if (!validLayerMaterials.includes(material)) {
                 return errorResponse(res, `Invalid material for ${key}: ${material}`, 400);
             }
+            // Validate color
             if (typeof color !== 'string' || color.trim() === '') {
                 return errorResponse(res, `Invalid color for ${key}`, 400);
             }
         } else {
-            return errorResponse(res, `Layer ${key} is missing`, 400);
+            // If layer is not provided, it is considered valid (optional)
+            continue; // Skip validation for this layer
         }
     }
 
@@ -92,8 +85,9 @@ const createOrder = async (req, res) => {
             customerName,
             customerEmail,
             shoeSize,
-            layers, // Include layers when creating the order
-            modelType // Store modelType in the database
+            sneakerLayers: modelType === 'sneaker' ? layers : undefined, // Assign sneaker layers if model type is sneaker
+            heelLayers: modelType === 'heel' ? layers : undefined, // Assign heel layers if model type is heel
+            modelType
         });
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
@@ -110,6 +104,7 @@ const getAllOrders = async (req, res) => {
 
         const filter = modelType ? { modelType } : {};
 
+        // Sort orders based on query parameters
         if (sortby === 'votes') {
             orders = await Order.find(filter).sort({ votes: -1 });
         } else if (sortby === 'date') {
