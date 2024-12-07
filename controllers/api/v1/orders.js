@@ -27,6 +27,7 @@ const createOrder = async (req, res) => {
         customerName,
         customerEmail,
         shoeSize,
+        address,
         layers,
         modelType
     } = req.body;
@@ -34,6 +35,11 @@ const createOrder = async (req, res) => {
     // Validate modelType
     if (!['sneaker', 'heel'].includes(modelType)) {
         return errorResponse(res, 'Invalid model type', 400);
+    }
+
+    // Validate address
+    if (!address || typeof address !== 'string' || address.trim() === '') {
+        return errorResponse(res, 'Address is required', 400);
     }
 
     // Define layer keys and valid materials based on model type
@@ -85,6 +91,7 @@ const createOrder = async (req, res) => {
             customerName,
             customerEmail,
             shoeSize,
+            address,
             sneakerLayers: modelType === 'sneaker' ? layers : undefined, // Assign sneaker layers if model type is sneaker
             heelLayers: modelType === 'heel' ? layers : undefined, // Assign heel layers if model type is heel
             modelType
