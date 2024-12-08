@@ -46,7 +46,7 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .catch(err => console.log('MongoDB connection error:', err));
 
 // Set up routes
-app.use('/users', usersRouter);
+app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/orders', ordersRouter);
 
 // Catch 404 errors and forward them to error handler
