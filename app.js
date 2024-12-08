@@ -19,7 +19,7 @@ var app = express();
 app.use(cors({
   origin: '*', // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
-  credentials: true // Enable set cookies (if you need cookies, keep this true)
+  credentials: true // Enable set cookies
 }));
 
 // Set up logging, parsing, and static files handling

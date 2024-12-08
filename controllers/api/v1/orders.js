@@ -80,7 +80,7 @@ const createOrder = async (req, res) => {
                 return errorResponse(res, `Invalid color for ${key}`, 400);
             }
         } else {
-            // If layer is not provided, it is considered valid (optional)
+            // If layer is not provided, it is considered valid
             continue; // Skip validation for this layer
         }
     }
