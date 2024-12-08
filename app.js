@@ -32,13 +32,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 // MongoDB connection setup using Mongoose
 const mongoURI = process.env.MONGO_URI; // Get MongoDB URI from .env file
 
-// Debugging: Ensure the MongoDB URI is loaded correctly
+// Get JWT secret from environment variables
+const jwtSecret = process.env.JWT_SECRET;
+
+// Debugging: Ensure the MongoDB URI and JWT secret are loaded correctly
 if (!mongoURI) {
   console.error("MongoDB URI is missing. Please check your .env file.");
   process.exit(1); // Exit the app if the URI is not found
 }
 
+if (!jwtSecret) {
+  console.error("JWT secret is missing. Please check your .env file.");
+  process.exit(1); // Exit the app if the JWT secret is not found
+}
+
 console.log('MongoDB URI:', mongoURI); // Debugging: verify URI
+console.log('JWT Secret Loaded'); // Confirm JWT secret loading
 
 // Connect to MongoDB Atlas
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
