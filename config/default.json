@@ -1,6 +1,6 @@
 {
   "mongodb": {
-    "uri": "mongodb+srv://brendvandeneynde:<password>@build-shoe-config.l99ze.mongodb.net/"
+    "uri": "mongodb+srv://brendvandeneynde:IdeUIkWfMvnh73XS@build-shoe-config.l99ze.mongodb.net/"
   },
   "server": {
     "port": 3000

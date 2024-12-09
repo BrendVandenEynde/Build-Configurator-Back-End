@@ -1,30 +1,18 @@
 const User = require('../../../models/api/v1/User.js');
 const jwt = require('jsonwebtoken');
+const config = require('config'); // Ensure you import config for JWT secret
 
 // Middleware to check if the user is an admin
 const checkAdmin = (req, res, next) => {
-    try {
-        const token = req.headers['authorization']?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ status: 'error', message: 'No token provided' });
-        }
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(401).json({ status: 'error', message: 'No token provided' });
 
-        // Verify JWT token
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                return res.status(403).json({ status: 'error', message: 'Failed to authenticate token' });
-            }
-
-            if (decoded.role !== 'admin') {
-                return res.status(403).json({ status: 'error', message: 'Not authorized' });
-            }
-
-            req.userId = decoded.id; // Save the user ID for further use
-            next();
-        });
-    } catch (error) {
-        return res.status(500).json({ status: 'error', message: error.message });
-    }
+    jwt.verify(token, config.get('jwtSecret'), (err, decoded) => {
+        if (err) return res.status(403).json({ status: 'error', message: 'Failed to authenticate token' });
+        if (decoded.role !== 'admin') return res.status(403).json({ status: 'error', message: 'Not authorized' });
+        req.userId = decoded.id; // Save the user ID for further use
+        next();
+    });
 };
 
 // User registration
@@ -67,7 +55,7 @@ const loginUser = async (req, res) => {
         }
 
         // Generate JWT token
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id, role: user.role }, config.get('jwtSecret'), { expiresIn: '1h' });
         return res.status(200).json({ status: 'success', data: { token } });
     } catch (error) {
         return res.status(500).json({ status: 'error', message: error.message });
