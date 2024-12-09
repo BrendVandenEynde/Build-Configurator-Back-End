@@ -21,6 +21,43 @@ const checkAdmin = (req, res, next) => {
     });
 };
 
+// Validate layer materials and colors
+const validateLayers = (layers, modelType) => {
+    const validLayerMaterials = [
+        'none selected',
+        'army',
+        'crocodile',
+        'glitter',
+        'leather',
+        'leopard',
+        'blocked',
+        'zebra',
+        'flower',
+        'pizza'
+    ];
+
+    let layerKeys;
+    if (modelType === 'sneaker') {
+        layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
+    } else if (modelType === 'heel') {
+        layerKeys = ['Object_2', 'Object_3', 'Object_4', 'Object_5'];
+    }
+
+    for (const key of layerKeys) {
+        const layer = layers[key];
+        if (layer) {
+            const { material, color } = layer;
+            if (!validLayerMaterials.includes(material)) {
+                return `Invalid material for ${key}: ${material}`;
+            }
+            if (typeof color !== 'string' || color.trim() === '') {
+                return `Invalid color for ${key}`;
+            }
+        }
+    }
+    return null; // Return null if validation passes
+};
+
 // Create a new order
 const createOrder = async (req, res) => {
     const {
@@ -42,47 +79,10 @@ const createOrder = async (req, res) => {
         return errorResponse(res, 'Address is required', 400);
     }
 
-    // Define layer keys and valid materials based on model type
-    let layerKeys;
-    const validLayerMaterials = [
-        'none selected',
-        'army',
-        'crocodile',
-        'glitter',
-        'leather',
-        'leopard',
-        'blocked',
-        'zebra',
-        'flower',
-        'pizza'
-    ];
-
-    if (modelType === 'sneaker') {
-        layerKeys = ['inside', 'laces', 'outside1', 'outside2', 'sole1', 'sole2'];
-    } else if (modelType === 'heel') {
-        layerKeys = ['Object_2', 'Object_3', 'Object_4', 'Object_5'];
-    }
-
     // Validate layers
-    for (const key of layerKeys) {
-        const layer = layers[key];
-
-        // If layer is provided, validate its contents
-        if (layer) {
-            const { material, color } = layer;
-
-            // Validate material
-            if (!validLayerMaterials.includes(material)) {
-                return errorResponse(res, `Invalid material for ${key}: ${material}`, 400);
-            }
-            // Validate color
-            if (typeof color !== 'string' || color.trim() === '') {
-                return errorResponse(res, `Invalid color for ${key}`, 400);
-            }
-        } else {
-            // If layer is not provided, it is considered valid
-            continue; // Skip validation for this layer
-        }
+    const layerError = validateLayers(layers, modelType);
+    if (layerError) {
+        return errorResponse(res, layerError, 400);
     }
 
     try {
@@ -99,7 +99,7 @@ const createOrder = async (req, res) => {
         await newOrder.save();
         res.status(201).json({ status: 'success', data: { order: newOrder } });
     } catch (error) {
-        errorResponse(res, error.message, 400);
+        errorResponse(res, `Error creating order: ${error.message}`, 500);
     }
 };
 
@@ -107,9 +107,8 @@ const createOrder = async (req, res) => {
 const getAllOrders = async (req, res) => {
     try {
         const { sortby, modelType } = req.query;
-        let orders;
-
         const filter = modelType ? { modelType } : {};
+        let orders;
 
         // Sort orders based on query parameters
         if (sortby === 'votes') {
@@ -122,7 +121,7 @@ const getAllOrders = async (req, res) => {
 
         res.status(200).json({ status: 'success', data: { orders } });
     } catch (error) {
-        errorResponse(res, error.message);
+        errorResponse(res, `Error retrieving orders: ${error.message}`, 500);
     }
 };
 
@@ -136,7 +135,7 @@ const getOrderById = async (req, res) => {
         }
         res.status(200).json({ status: 'success', data: { order } });
     } catch (error) {
-        errorResponse(res, error.message);
+        errorResponse(res, `Error retrieving order: ${error.message}`, 500);
     }
 };
 
@@ -161,7 +160,7 @@ const updateOrder = async (req, res) => {
         }
         res.status(200).json({ status: 'success', data: { order: updatedOrder } });
     } catch (error) {
-        errorResponse(res, error.message, 400);
+        errorResponse(res, `Error updating order: ${error.message}`, 500);
     }
 };
 
@@ -176,7 +175,7 @@ const deleteOrder = async (req, res) => {
         }
         res.status(200).json({ status: 'success', message: 'Order deleted successfully' });
     } catch (error) {
-        errorResponse(res, error.message);
+        errorResponse(res, `Error deleting order: ${error.message}`, 500);
     }
 };
 
